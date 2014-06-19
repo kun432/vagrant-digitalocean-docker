@@ -1,0 +1,35 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+Vagrant.require_version ">= 1.5.0"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.hostname = "vagrant-digitalocean-docker-berkshelf"
+  config.vm.synced_folder ".", "/vagrant", :disabled => true
+
+  config.omnibus.chef_version = :latest
+  config.ssh.pty = true
+
+  config.vm.provider :digital_ocean do |provider, override|
+    provider.client_id            = 'YOUR_CLIENT_ID'
+    provider.api_key              = 'YOUR_API_KEY'
+
+    provider.ssh_key_name         = 'YOUR_SSH_KEY_NAME'
+    override.ssh.private_key_path = 'YOUR_SSH_KEY_PATH'
+
+    override.vm.box               = 'digital_ocean'
+    override.vm.box_url           = "https://github.com/smdahlen/vagrant-digitalocean/raw/master/box/digital_ocean.box"
+
+    provider.image                = 'CentOS 6.5 x64'
+    provider.region               = 'Singapore 1'
+    provider.size                 = '512MB'
+  end
+
+  config.vm.provision :chef_solo do |chef|
+    chef.run_list = [
+        "recipe[vagrant-digitalocean-docker::default]"
+    ]
+  end
+end
